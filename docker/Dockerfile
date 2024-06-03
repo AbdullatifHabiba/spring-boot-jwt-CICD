@@ -2,7 +2,7 @@ FROM openjdk:16-jdk-alpine
 
 RUN mkdir -p /app
 WORKDIR /app
-COPY ./secure-me-1.0.jar ./jwt-demo.jar
+COPY ../target/*.jar ./jwt-demo.jar
 
 EXPOSE 8082
 
