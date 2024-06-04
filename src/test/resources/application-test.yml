@@ -7,3 +7,4 @@ spring:
     show-sql: false
     properties:
       hibernate.format_sql: false
+      
