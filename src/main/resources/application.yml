@@ -12,7 +12,6 @@ spring:
     username: jwtuser
     password: aFFsaToBgb1PXTrn2xAZHmBBK9zAcTc0
     url: jdbc:postgresql://dpg-cpfmqu7109ks73bnivv0-a.oregon-postgres.render.com/jwt_db_o1fj
-    driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
     generate-ddl: true
