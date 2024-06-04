@@ -40,7 +40,7 @@ curl --location --request POST 'https://ci-jwt.onrender.com/api/login' \
 
 #### 1. Swagger
 You have to authorize yourself first using the **access_token** from swagger before executing any API
-[http://localhost:8082/api/swagger-ui/index.html?configUrl=/v3/api-doc/swagger-config](https://ci-jwt.onrender.com/api/swagger-ui/index.html?configUrl=/v3/api-doc/swagger-config)
+[https://ci-jwt.onrender.com/api/swagger-ui/index.html?configUrl=/v3/api-doc/swagger-config](https://ci-jwt.onrender.com/api/swagger-ui/index.html?configUrl=/v3/api-doc/swagger-config)
 
 #### 2. CURL testing
 * Add user you need to replace the **access_token** with the provided header token from login API 
