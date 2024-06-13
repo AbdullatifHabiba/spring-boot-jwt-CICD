@@ -83,7 +83,7 @@ jobs:
         done
     
         # Capture initial logs from JWT container
-        docker logs jwt_container
+        docker logs jwt_container -f
       
 
     - name: Run integration tests
