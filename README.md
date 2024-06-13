@@ -30,7 +30,7 @@ Or you can change it and use a user details of your choice.
 Some curl command to try
 * Login API
 ````
-curl --location --request POST 'https://ci-jwt.onrender.com/api/login' \
+curl --location --request POST 'localhost:8082/api/login' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'username=msweelam' \
   --data-urlencode 'password=sweelam123' -i 
@@ -45,7 +45,7 @@ You have to authorize yourself first using the **access_token** from swagger bef
 #### 2. CURL testing
 * Add user you need to replace the **access_token** with the provided header token from login API 
 ````
-curl --location --request POST 'https://ci-jwt.onrender.com/api/user' \
+curl --location --request POST 'localhost:8082/api/user' \
 --header 'Authorization: Bearer <access_token>' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -61,7 +61,7 @@ curl --location --request POST 'https://ci-jwt.onrender.com/api/user' \
 ````
 * Refresh token API using the **refresh_token** provided from login if **access_token** expired
 ````
-curl --location --request GET 'https://ci-jwt.onrender.com/api/token' \
+curl --location --request GET 'localhost:8082/api/token' \
 --header 'Authorization: Bearer <refresh_token>' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -77,7 +77,7 @@ curl --location --request GET 'https://ci-jwt.onrender.com/api/token' \
 ````
 * Retrieve al users 
 ````
-curl --location --request GET 'https://ci-jwt.onrender.com/api/user' \
+curl --location --request GET 'localhost:8082/api/user' \
 --header 'Authorization: Bearer <access_token>'
 ````
 
