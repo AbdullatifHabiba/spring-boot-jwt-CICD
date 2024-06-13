@@ -1,57 +1,90 @@
+name: Java CI with Maven
 
-  name: Java CI with Maven
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
-  on:
-    push:
-      branches: [ master ]
-    pull_request:
-      branches: [ master ]
-  
-  jobs:
-    build:
-  
-      runs-on: ubuntu-latest
-  
-      steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-  
-      - name: Set up JDK 16
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '16'
-  
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-  
-      - name: Validate the POM
-        run: mvn validate
-  
-      - name: Test with Maven
-        run: mvn test
-  
-      - name: Build with Maven
-        run: mvn package
-  
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-  
-      - name: Login to DockerHub
-        uses: docker/login-action@v1 
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-  
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: abdullatifhabiba/ci_jwt:latest
-  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgresql:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_USER: jwtuser
+          POSTGRES_PASSWORD: letmein
+          POSTGRES_DB: jwt-db
+        options: >-
+          --health-cmd="pg_isready -U jwtuser"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 16
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '16'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Wait for PostgreSQL
+      run: |
+        echo "Waiting for PostgreSQL to be ready..."
+        while ! pg_isready -h localhost -p 5432 -U jwtuser; do
+          sleep 1
+        done
+
+    - name: Validate the POM
+      run: mvn validate
+     
+
+    - name: Build with Maven
+      run: mvn package
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1 
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build Docker image
+      run: docker build -t abdullatifhabiba/ci_jwt:latest .
+
+    - name: Run Docker container
+      run: |
+        docker run -d --name jwt_container -p 8082:8082 \
+        --network="host" \
+        -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/jwt-db \
+        -e SPRING_DATASOURCE_USERNAME=jwtuser \
+        -e SPRING_DATASOURCE_PASSWORD=letmein \
+        abdullatifhabiba/ci_jwt:latest
+
+    - name: Run integration tests
+      run: mvn verify
+      
+
+    - name: Push Docker image to DockerHub
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: abdullatifhabiba/ci_jwt:latest

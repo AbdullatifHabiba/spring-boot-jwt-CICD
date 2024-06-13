@@ -10,8 +10,8 @@ spring:
     name: jwt-demo
   datasource:
     username: jwtuser
-    password: aFFsaToBgb1PXTrn2xAZHmBBK9zAcTc0
-    url: jdbc:postgresql://dpg-cpfmqu7109ks73bnivv0-a.oregon-postgres.render.com/jwt_db_o1fj
+    password: letmein
+    url: jdbc:postgresql://localhost:5432/jwt-db
   jpa:
     show-sql: true
     generate-ddl: true
