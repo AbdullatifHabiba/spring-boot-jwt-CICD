@@ -66,19 +66,25 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build Docker image
-      run: docker build -t abdullatifhabiba/ci_jwt:latest .
-
-    - name: Run Docker container
+    - name: Build and run Docker image
       run: |
-        docker run --name jwt_container -p 8082:8082 \
-        --network="host" \
-        -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/jwt-db \
-        -e SPRING_DATASOURCE_USERNAME=jwtuser \
-        -e SPRING_DATASOURCE_PASSWORD=letmein \
-        abdullatifhabiba/ci_jwt:latest &
-        sleep 10 # Allow some time for the container to start
-        docker logs -f jwt_container
+        docker buildx build --platform linux/amd64 -t abdullatifhabiba/ci_jwt:latest .
+        docker run --name jwt_container -d -p 8082:8082 \
+          --network="host" \
+          -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/jwt-db \
+          -e SPRING_DATASOURCE_USERNAME=jwtuser \
+          -e SPRING_DATASOURCE_PASSWORD=letmein \
+          abdullatifhabiba/ci_jwt:latest
+    
+        # Wait for PostgreSQL and JWT container to be ready
+        echo "Waiting for PostgreSQL and JWT container to be ready..."
+        until pg_isready -h localhost -p 5432 -U jwtuser && docker inspect -f '{{.State.Running}}' jwt_container | grep -q true; do
+          sleep 1
+        done
+    
+        # Capture initial logs from JWT container
+        docker logs jwt_container
+      
 
     - name: Run integration tests
       run: mvn verify
